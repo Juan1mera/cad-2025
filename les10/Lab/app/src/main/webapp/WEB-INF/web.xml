@@ -1,36 +1,43 @@
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
-                      https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd"
-        
-    version="6.1"
-    metadata-complete="true">
-
-
-    <!-- Spring context listener -->
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd"
+         version="6.1" metadata-complete="true">
     <context-param>
         <param-name>contextClass</param-name>
         <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
     </context-param>
-
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>ru.bsuedu.cad.app.ConfigJpa</param-value>
     </context-param>
-
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-
     <servlet>
-        <servlet-name>studentService</servlet-name>
-        <servlet-class>ru.bsuedu.cad.app.servlet.StudentServlet</servlet-class>
+        <servlet-name>orderServlet</servlet-name>
+        <servlet-class>ru.bsuedu.cad.app.servlet.OrderServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
-        <servlet-name>studentService</servlet-name>
-        <url-pattern>/students</url-pattern>
+        <servlet-name>orderServlet</servlet-name>
+        <url-pattern>/orders</url-pattern>
     </servlet-mapping>
-
+    <servlet>
+        <servlet-name>orderFormServlet</servlet-name>
+        <servlet-class>ru.bsuedu.cad.app.servlet.OrderFormServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>orderFormServlet</servlet-name>
+        <url-pattern>/orders/new</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>productRestServlet</servlet-name>
+        <servlet-class>ru.bsuedu.cad.app.servlet.ProductRestServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>productRestServlet</servlet-name>
+        <url-pattern>/api/products</url-pattern>
+    </servlet-mapping>
 </web-app>
