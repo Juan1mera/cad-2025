@@ -351,6 +351,45 @@ Thymeleaf используется для:
 | 2013    | Широкое распространение в Spring-сообществе                         |
 | Сегодня | Является **де-факто стандартом** в Spring Boot для генерации HTML   |
 
+### Подключение Thymeleaf
+
+Добавьте в build.gradle.kts
+
+```kotlin
+
+    implementation("org.thymeleaf:thymeleaf:3.1.2.RELEASE")
+    implementation("org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE") // для Spring 6 / Jakarta
+```
+
+Сконфигурируйте необходимые бины.
+
+``` java
+    @Bean
+    public ClassLoaderTemplateResolver templateResolver() {
+        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setPrefix("templates/"); // папка в resources
+        resolver.setSuffix(".html");
+        resolver.setTemplateMode(TemplateMode.HTML);
+        resolver.setCharacterEncoding("UTF-8");
+        resolver.setCacheable(false);
+        return resolver;
+    }
+
+    @Bean
+    public SpringTemplateEngine templateEngine() {
+        SpringTemplateEngine engine = new SpringTemplateEngine();
+        engine.setTemplateResolver(templateResolver());
+        return engine;
+    }
+
+    @Bean
+    public ViewResolver viewResolver() {
+        ThymeleafViewResolver resolver = new ThymeleafViewResolver();
+        resolver.setTemplateEngine(templateEngine());
+        resolver.setCharacterEncoding("UTF-8");
+        return resolver;
+    }
+```
 
 #### Преимущества Thymeleaf
 
