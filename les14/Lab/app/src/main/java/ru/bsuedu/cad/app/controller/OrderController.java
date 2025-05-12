@@ -52,27 +52,12 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/view")
-    public String viewOrders(Model model) {
-        try {
-            LOGGER.info("Attempting to load orders for viewing");
-            List<Order> orders = orderService.findAllOrders();
-            LOGGER.info("Loaded {} orders", orders.size());
-            model.addAttribute("orders", orders);
-            return "orders-view";
-        } catch (Exception e) {
-            LOGGER.error("Error loading orders for viewing", e);
-            model.addAttribute("error", "No se pudieron cargar los pedidos: " + e.getMessage());
-            return "error";
-        }
-    }
-
     @GetMapping("/new")
     public String showOrderForm(Model model) {
         try {
             LOGGER.info("Loading order form");
             Order order = new Order();
-            order.setOrderProducts(new ArrayList<>());
+            order.setOrderProducts(new ArrayList<>()); // Inicializar orderProducts
             model.addAttribute("order", order);
             List<User> users = userService.findAllUsers();
             List<Product> products = productService.findAllProducts();
@@ -134,9 +119,11 @@ public class OrderController {
                 model.addAttribute("error", "El pedido no existe.");
                 return "error";
             }
+            // Asegurarse de que orderProducts esté inicializado
             if (order.getOrderProducts() == null) {
                 order.setOrderProducts(new ArrayList<>());
             }
+            // Crear un mapa de productId a amount
             Map<Long, Integer> productAmounts = new HashMap<>();
             for (OrderProduct op : order.getOrderProducts()) {
                 if (op.getProduct() != null) {
@@ -150,7 +137,7 @@ public class OrderController {
             LOGGER.info("Loaded {} users and {} products for edit form", users.size(), products.size());
             model.addAttribute("users", users);
             model.addAttribute("products", products);
-            return "order-form-update";
+            return "order-form-update"; // Usar la nueva vista
         } catch (Exception e) {
             LOGGER.error("Error loading edit form for order {}: {}", id, e.getMessage(), e);
             model.addAttribute("error", "No se pudo cargar el formulario de edición: " + e.getMessage());
@@ -197,6 +184,7 @@ public class OrderController {
             LOGGER.error("Error updating order {}: {}", id, e.getMessage(), e);
             model.addAttribute("error", "No se pudo actualizar el pedido: " + e.getMessage());
             model.addAttribute("order", order);
+            // Restaurar productAmounts en caso de error
             Map<Long, Integer> productAmounts = new HashMap<>();
             if (productIds != null) {
                 for (Long productId : productIds) {
@@ -211,10 +199,9 @@ public class OrderController {
             model.addAttribute("productAmounts", productAmounts);
             model.addAttribute("users", userService.findAllUsers());
             model.addAttribute("products", productService.findAllProducts());
-            return "order-form-update";
+            return "order-form-update"; // Devolver la vista de edición en caso de error
         }
     }
-
     @PostMapping("/delete/{id}")
     public String deleteOrder(@PathVariable("id") Long id, Model model) {
         try {

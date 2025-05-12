@@ -35,11 +35,8 @@ public class ConfigBasic {
             hc.setDriverClassName(driverClassName);
             hc.setUsername(username);
             hc.setPassword(password);
-            hc.addDataSourceProperty("autoCommit", "true");
-            hc.setMaximumPoolSize(25);
-            // Ensure proper cleanup of MySQL resources
-            hc.addDataSourceProperty("leakDetectionThreshold", "2000");
             HikariDataSource dataSource = new HikariDataSource(hc);
+            dataSource.setMaximumPoolSize(25);
             return dataSource;
         } catch (Exception e) {
             LOGGER.error("Hikari DataSource bean cannot be created!", e);

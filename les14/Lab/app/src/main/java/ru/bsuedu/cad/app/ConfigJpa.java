@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@Import({ConfigBasic.class, ConfigSecurity.class})
+@Import(ConfigBasic.class)
 @ComponentScan(basePackages = {"ru.bsuedu.cad.app", "ru.bsuedu.cad.app.controller"})
 @EnableJpaRepositories(basePackages = "ru.bsuedu.cad.app.repository")
 @EnableTransactionManagement
