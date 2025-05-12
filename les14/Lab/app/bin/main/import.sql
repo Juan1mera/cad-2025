@@ -1,7 +1,9 @@
+TRUNCATE TABLE user;
 INSERT INTO user (username, password, role) VALUES
 ('admin', 'admin123', 'ADMIN'),
 ('user1', 'user123', 'USER');
 
+TRUNCATE TABLE category;
 INSERT INTO category (name, description) VALUES
 ('Comida', 'Alimentos para mascotas'),
 ('Juguetes', 'Juguetes para mascotas');

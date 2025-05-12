@@ -35,6 +35,9 @@ dependencies {
 
     implementation("org.springframework:spring-webmvc:6.2.4")
     implementation("org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE")
+
+    implementation("org.springframework.security:spring-security-web:6.2.2")
+    implementation("org.springframework.security:spring-security-config:6.2.2")
 }
 
 java {
