@@ -1,8 +1,9 @@
 package ru.bsuedu.cad.app.entity;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "user", schema = "university")
 public class User extends AbstractEntity {
     private String username;
     private String password;

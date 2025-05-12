@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="${order.id == null} ? 'Crear Pedido' : 'Editar Pedido'"></title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}"/>
+</head>
+<body>
+    <div class="brutalist-container brutalist-header">
+        <h1 th:text="${order.id == null} ? 'Crear Pedido' : 'Editar Pedido'"></h1>
+        <div>
+            <span sec:authentication="name"></span>
+            <a th:href="@{/logout}" class="brutalist-btn brutalist-btn--danger">Cerrar Sesión</a>
+        </div>
+    </div>
+    <div class="brutalist-container">
+        <form th:action="${order.id == null} ? @{/orders} : @{/orders/update/{id}(id=${order.id})}" method="post">
+            <div>
+                <label for="description">Descripción:</label>
+                <input type="text" id="description" name="description" th:value="${order.description}"/>
+            </div>
+            <div>
+                <label>Productos:</label>
+                <div th:each="product, iterStat : ${products}">
+                    <input type="checkbox" th:id="'product' + ${iterStat.index}" name="productIds" th:value="${product.id}"
+                           th:checked="${productIds.contains(product.id)}"/>
+                    <label th:for="'product' + ${iterStat.index}" th:text="${product.name} + ' ($' + ${product.price} + ')'"></label>
+                    <input type="number" th:name="'amounts[' + ${iterStat.index} + ']'" min="1"
+                           th:value="${amounts[iterStat.index] != null ? amounts[iterStat.index] : 1}"
+                           th:style="${productIds.contains(product.id)} ? 'display: inline' : 'display: none'"
+                           th:class="'amount-input' + ${iterStat.index}"/>
+                </div>
+            </div>
+            <button type="submit" class="brutalist-btn brutalist-btn--primary">Guardar</button>
+            <a th:href="@{/orders}" class="brutalist-btn">Cancelar</a>
+        </form>
+    </div>
+    <script>
+        document.querySelectorAll('input[name="productIds"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const index = this.id.replace('product', '');
+                const amountInput = document.querySelector('.amount-input' + index);
+                amountInput.style.display = this.checked ? 'inline' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

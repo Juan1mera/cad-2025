@@ -3,7 +3,7 @@ package ru.bsuedu.cad.app.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "order_product")
+@Table(name = "order_product", schema = "university")
 public class OrderProduct extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)

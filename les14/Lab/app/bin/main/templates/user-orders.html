@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Pedidos</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}"/>
+</head>
+<body>
+    <div class="brutalist-container brutalist-header">
+        <h1>Lista de Pedidos</h1>
+        <div>
+            <span sec:authentication="name"></span>
+            <a th:href="@{/logout}" class="brutalist-btn brutalist-btn--danger">Cerrar Sesión</a>
+        </div>
+    </div>
+    <div th:if="${orders == null or orders.isEmpty()}" class="brutalist-container brutalist-no-orders">
+        <p>No hay pedidos registrados.</p>
+    </div>
+    <div th:unless="${orders == null or orders.isEmpty()}" class="brutalist-container">
+        <p class="brutalist-total-orders">Total de pedidos encontrados: <span th:text="${orders.size()}"></span></p>
+        <table class="brutalist-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descripción</th>
+                    <th>Usuario</th>
+                    <th>Productos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}"></td>
+                    <td th:text="${order.description} ?: 'Sin descripción'"></td>
+                    <td th:text="${order.user?.username} ?: 'Sin usuario'"></td>
+                    <td>
+                        <span th:if="${order.orderProducts == null or order.orderProducts.isEmpty()}">
+                            Ningún producto
+                        </span>
+                        <span th:unless="${order.orderProducts == null or order.orderProducts.isEmpty()}" class="brutalist-product-list">
+                            <span th:each="op, iterStat : ${order.orderProducts}">
+                                <span th:text="${op.product?.name ?: 'Producto desconocido'} + ' (Cantidad: ' + ${op.amount} + ${op.product?.price != null ? ', $' + op.product.price : ''} + ')' + ${iterStat.last ? '' : ''}"></span>
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

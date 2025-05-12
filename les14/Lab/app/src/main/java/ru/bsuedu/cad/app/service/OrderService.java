@@ -1,8 +1,8 @@
 package ru.bsuedu.cad.app.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.bsuedu.cad.app.entity.Order;
 import ru.bsuedu.cad.app.entity.OrderProduct;
 import ru.bsuedu.cad.app.entity.Product;
@@ -11,7 +11,9 @@ import ru.bsuedu.cad.app.repository.OrderRepository;
 import ru.bsuedu.cad.app.repository.ProductRepository;
 import ru.bsuedu.cad.app.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -20,68 +22,72 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private ProductRepository productRepository;
 
     @Autowired
-    private ProductRepository productRepository;
+    private UserRepository userRepository;
 
     public List<Order> findAllOrders() {
         return orderRepository.findAll();
     }
 
-    public Order findOrderById(Long id) {
+    public Order findById(Long id) {
         return orderRepository.findById(id).orElse(null);
     }
 
-    @Transactional
-    public Order saveOrder(Order order) {
-        return orderRepository.save(order);
-    }
+    public void createOrder(String description, List<Long> productIds, List<Integer> amounts) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
 
-    @Transactional
-    public void deleteOrder(Long id) {
-        orderRepository.deleteById(id);
-    }
-
-    @Transactional
-    public Order createOrder(String description, Long userId, List<ProductOrderRequest> productOrders) {
         Order order = new Order();
         order.setDescription(description);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + userId));
         order.setUser(user);
+        order.setOrderProducts(new ArrayList<>());
 
-        if (productOrders != null && !productOrders.isEmpty()) {
-            for (ProductOrderRequest request : productOrders) {
-                Product product = productRepository.findById(request.getProductId())
-                        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + request.getProductId()));
+        for (int i = 0; i < productIds.size(); i++) {
+            Long productId = productIds.get(i);
+            Integer amount = amounts.get(i);
+            Optional<Product> productOpt = productRepository.findById(productId);
+            if (productOpt.isPresent()) {
                 OrderProduct orderProduct = new OrderProduct();
                 orderProduct.setOrder(order);
-                orderProduct.setProduct(product);
-                orderProduct.setAmount(request.getAmount());
+                orderProduct.setProduct(productOpt.get());
+                orderProduct.setAmount(amount);
                 order.getOrderProducts().add(orderProduct);
             }
         }
 
-        return orderRepository.save(order);
+        orderRepository.save(order);
     }
 
-    public static class ProductOrderRequest {
-        private final Long productId;
-        private final int amount;
+    public void updateOrder(Long id, String description, List<Long> productIds, List<Integer> amounts) {
+        Optional<Order> orderOpt = orderRepository.findById(id);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            order.setDescription(description);
+            order.getOrderProducts().clear();
 
-        public ProductOrderRequest(Long productId, int amount) {
-            this.productId = productId;
-            this.amount = amount;
-        }
+            for (int i = 0; i < productIds.size(); i++) {
+                Long productId = productIds.get(i);
+                Integer amount = amounts.get(i);
+                Optional<Product> productOpt = productRepository.findById(productId);
+                if (productOpt.isPresent()) {
+                    OrderProduct orderProduct = new OrderProduct();
+                    orderProduct.setOrder(order);
+                    orderProduct.setProduct(productOpt.get());
+                    orderProduct.setAmount(amount);
+                    order.getOrderProducts().add(orderProduct);
+                }
+            }
 
-        public Long getProductId() {
-            return productId;
+            orderRepository.save(order);
         }
+    }
 
-        public int getAmount() {
-            return amount;
-        }
+    public void deleteOrder(Long id) {
+        orderRepository.deleteById(id);
     }
 }

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Usuario</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        .brutalist-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 3px solid #000;
+            background: #f5f5f5;
+            box-shadow: 5px 5px 0 #000;
+        }
+        .brutalist-container h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .brutalist-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .brutalist-form label {
+            font-weight: bold;
+        }
+        .brutalist-form input, .brutalist-form select {
+            padding: 8px;
+            border: 2px solid #000;
+            font-size: 16px;
+        }
+        .brutalist-btn {
+            padding: 10px;
+            border: 2px solid #000;
+            background: #000;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .brutalist-btn:hover {
+            background: #333;
+        }
+        .brutalist-error {
+            color: red;
+            font-weight: bold;
+        }
+        .brutalist-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .brutalist-link a {
+            color: #000;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="brutalist-container">
+        <h1>Registrar Usuario</h1>
+        <form th:action="@{/register}" method="post" class="brutalist-form">
+            <div th:if="${error}" class="brutalist-error" th:text="${error}"></div>
+            <label for="username">Usuario:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="role">Rol:</label>
+            <select id="role" name="role" required>
+                <option value="USER">Usuario</option>
+                <option value="MANAGER">Manager</option>
+            </select>
+            <button type="submit" class="brutalist-btn">Registrar</button>
+        </form>
+        <div class="brutalist-link">
+            <a th:href="@{/login}">Ya tengo una cuenta</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "order_")
+@Table(name = "orders", schema = "university")
 public class Order extends AbstractEntity {
 
     @Column(name = "description")

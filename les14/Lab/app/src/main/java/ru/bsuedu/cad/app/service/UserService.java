@@ -5,19 +5,21 @@ import org.springframework.stereotype.Service;
 import ru.bsuedu.cad.app.entity.User;
 import ru.bsuedu.cad.app.repository.UserRepository;
 
-import java.util.List;
-
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
 
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
-    public User findUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public void saveUser(String username, String password, String role) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setRole(role);
+        userRepository.save(user);
     }
 }
