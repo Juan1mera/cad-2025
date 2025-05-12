@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Pedidos (Solo Lectura)</title>
+    <link rel="stylesheet" th:href="@{/static/styles.css}">
+</head>
+<body>
+    <h1>Lista de Pedidos</h1>
+    <div th:if="${error}" class="error">
+        <p th:text="${error}"></p>
+    </div>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descripción</th>
+                <th>Usuario</th>
+                <th>Productos</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.id}"></td>
+                <td th:text="${order.description}"></td>
+                <td th:text="${order.user?.username}"></td>
+                <td>
+                    <span th:each="orderProduct, iterStat : ${order.orderProducts}"
+                          th:text="${orderProduct.product?.name} + ' (Cantidad: ' + ${orderProduct.amount} + ')'"
+                          th:unless="${iterStat.last}">,</span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="/logout">Cerrar Sesión</a>
+</body>
+</html>
