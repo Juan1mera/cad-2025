@@ -3,6 +3,7 @@ package ru.bsuedu.cad.app.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.bsuedu.cad.app.entity.Order;
 import ru.bsuedu.cad.app.entity.OrderProduct;
 import ru.bsuedu.cad.app.entity.Product;
@@ -35,6 +36,7 @@ public class OrderService {
         return orderRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public void createOrder(String description, List<Long> productIds, List<Integer> amounts) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username);
@@ -47,29 +49,11 @@ public class OrderService {
         order.setUser(user);
         order.setOrderProducts(new ArrayList<>());
 
-        for (int i = 0; i < productIds.size(); i++) {
-            Long productId = productIds.get(i);
-            Integer amount = amounts.get(i);
-            Optional<Product> productOpt = productRepository.findById(productId);
-            if (productOpt.isPresent()) {
-                OrderProduct orderProduct = new OrderProduct();
-                orderProduct.setOrder(order);
-                orderProduct.setProduct(productOpt.get());
-                orderProduct.setAmount(amount);
-                order.getOrderProducts().add(orderProduct);
-            }
-        }
+        // Guardar la orden para obtener un ID válido
+        order = orderRepository.saveAndFlush(order);
 
-        orderRepository.save(order);
-    }
-
-    public void updateOrder(Long id, String description, List<Long> productIds, List<Integer> amounts) {
-        Optional<Order> orderOpt = orderRepository.findById(id);
-        if (orderOpt.isPresent()) {
-            Order order = orderOpt.get();
-            order.setDescription(description);
-            order.getOrderProducts().clear();
-
+        // Procesar productos solo si las listas son válidas
+        if (productIds != null && amounts != null && !productIds.isEmpty() && productIds.size() == amounts.size()) {
             for (int i = 0; i < productIds.size(); i++) {
                 Long productId = productIds.get(i);
                 Integer amount = amounts.get(i);
@@ -82,12 +66,46 @@ public class OrderService {
                     order.getOrderProducts().add(orderProduct);
                 }
             }
-
-            orderRepository.save(order);
+            // Persistir la orden con los productos asociados
+            orderRepository.saveAndFlush(order);
         }
     }
 
+    @Transactional
+    public void updateOrder(Long id, String description, List<Long> productIds, List<Integer> amounts) {
+        Optional<Order> orderOpt = orderRepository.findById(id);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            order.setDescription(description);
+            order.getOrderProducts().clear();
+            orderRepository.saveAndFlush(order);
+
+            if (productIds != null && amounts != null && !productIds.isEmpty() && productIds.size() == amounts.size()) {
+                for (int i = 0; i < productIds.size(); i++) {
+                    Long productId = productIds.get(i);
+                    Integer amount = amounts.get(i);
+                    Optional<Product> productOpt = productRepository.findById(productId);
+                    if (productOpt.isPresent()) {
+                        OrderProduct orderProduct = new OrderProduct();
+                        orderProduct.setOrder(order);
+                        orderProduct.setProduct(productOpt.get());
+                        orderProduct.setAmount(amount);
+                        order.getOrderProducts().add(orderProduct);
+                    }
+                }
+            }
+            orderRepository.saveAndFlush(order);
+        }
+    }
+
+    @Transactional
     public void deleteOrder(Long id) {
-        orderRepository.deleteById(id);
+        Optional<Order> orderOpt = orderRepository.findById(id);
+        if (orderOpt.isPresent()) {
+            Order order = orderOpt.get();
+            order.getOrderProducts().clear();
+            orderRepository.saveAndFlush(order);
+            orderRepository.deleteById(id);
+        }
     }
 }

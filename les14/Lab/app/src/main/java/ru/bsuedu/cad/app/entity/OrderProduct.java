@@ -3,19 +3,31 @@ package ru.bsuedu.cad.app.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "order_product", schema = "university")
-public class OrderProduct extends AbstractEntity {
+@Table(name = "pedido_producto", schema = "university")
+public class OrderProduct {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "pedido_id")
     private Order order;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = "amount")
     private Integer amount;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Order getOrder() {
         return order;

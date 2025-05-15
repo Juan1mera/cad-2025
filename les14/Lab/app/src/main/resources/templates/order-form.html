@@ -16,18 +16,42 @@
         <form th:action="${order.id == null} ? @{/orders} : @{/orders/update/{id}(id=${order.id})}" method="post">
             <div>
                 <label for="description">Descripción:</label>
-                <input type="text" id="description" name="description" th:value="${order.description}"/>
+                <input type="text" id="description" name="description" th:value="${order.description}" required/>
             </div>
+            <div th:if="${error}" class="error" th:text="${error}"></div>
             <div>
                 <label>Productos:</label>
-                <div th:each="product, iterStat : ${products}">
-                    <input type="checkbox" th:id="'product' + ${iterStat.index}" name="productIds" th:value="${product.id}"
-                           th:checked="${productIds.contains(product.id)}"/>
-                    <label th:for="'product' + ${iterStat.index}" th:text="${product.name} + ' ($' + ${product.price} + ')'"></label>
-                    <input type="number" th:name="'amounts[' + ${iterStat.index} + ']'" min="1"
-                           th:value="${amounts[iterStat.index] != null ? amounts[iterStat.index] : 1}"
-                           th:style="${productIds.contains(product.id)} ? 'display: inline' : 'display: none'"
-                           th:class="'amount-input' + ${iterStat.index}"/>
+                <div th:if="${products == null or products.isEmpty()}">
+                    <p class="error">No hay productos disponibles.</p>
+                </div>
+                <div th:unless="${products == null or products.isEmpty()}">
+                    <table class="brutalist-table">
+                        <thead>
+                            <tr>
+                                <th>Seleccionar</th>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${products}">
+                                <td>
+                                    <input type="checkbox" th:id="'product-' + ${product.id}" name="productIds" th:value="${product.id}"
+                                           th:checked="${productIds != null and productIds.contains(product.id)}"/>
+                                </td>
+                                <td th:text="${product.name}"></td>
+                                <td th:text="'$' + ${product.price}"></td>
+                                <td>
+                                    <input type="number" name="amounts" min="1"
+                                           th:value="${productIds != null and productIds.contains(product.id) and amounts.size() > productIds.indexOf(product.id) ? amounts[productIds.indexOf(product.id)] : 1}"
+                                           th:class="'amount-input-' + ${product.id}"
+                                           th:style="${productIds != null and productIds.contains(product.id)} ? 'display: inline-block' : 'display: none'"
+                                           style="width: 60px;"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <button type="submit" class="brutalist-btn brutalist-btn--primary">Guardar</button>
@@ -37,9 +61,11 @@
     <script>
         document.querySelectorAll('input[name="productIds"]').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
-                const index = this.id.replace('product', '');
-                const amountInput = document.querySelector('.amount-input' + index);
-                amountInput.style.display = this.checked ? 'inline' : 'none';
+                const productId = this.value;
+                const amountInput = document.querySelector('.amount-input-' + productId);
+                if (amountInput) {
+                    amountInput.style.display = this.checked ? 'inline-block' : 'none';
+                }
             });
         });
     </script>
