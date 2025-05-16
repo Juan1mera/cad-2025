@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Pedidos</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}"/>
+</head>
+
+<style>
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #d3d3d3;
+    color: #323232;
+    margin: 0;
+    padding: 0;
+}
+
+.brutalist-container {
+    padding: 20px;
+    background: lightgrey;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    border-radius: 5px;
+    border: 2px solid #323232;
+    box-shadow: 4px 4px #323232;
+    margin: 20px auto;
+    max-width: 1000px;
+}
+
+.brutalist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.brutalist-header h1 {
+    color: #323232;
+    font-weight: 900;
+    font-size: 20px;
+    margin: 0;
+}
+
+.brutalist-btn {
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: 2px solid #323232;
+    background-color: #fff;
+    box-shadow: 4px 4px #323232;
+    font-size: 15px;
+    font-weight: 600;
+    color: #323232;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.brutalist-btn--primary {
+    background-color: #2d8cf0;
+    color: #fff;
+    border-color: #2d8cf0;
+}
+
+.brutalist-btn--danger {
+    background-color: #fff;
+    color: #323232;
+}
+
+.brutalist-btn:active {
+    box-shadow: 0 0 #323232;
+    transform: translate(3px, 3px);
+}
+
+.brutalist-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border: 2px solid #323232;
+    box-shadow: 4px 4px #323232;
+}
+
+.brutalist-table th,
+.brutalist-table td {
+    border: 2px solid #323232;
+    padding: 10px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+    color: #323232;
+}
+
+.brutalist-table th {
+    background-color: lightgrey;
+    text-transform: uppercase;
+}
+
+.brutalist-total-orders {
+    color: #323232;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.brutalist-no-orders {
+    color: #666;
+    font-weight: 600;
+    font-size: 15px;
+    border: 2px solid #323232;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 4px 4px #323232;
+    text-align: center;
+}
+</style>
+
+<body>
+    <div class="brutalist-container brutalist-header">
+        <h1>Lista de Pedidos</h1>
+        <div>
+            <span sec:authentication="name"></span>
+            <a th:href="@{/logout}" class="brutalist-btn brutalist-btn--danger">Cerrar Sesión</a>
+        </div>
+    </div>
+    <div th:if="${orders == null or orders.isEmpty()}" class="brutalist-container brutalist-no-orders">
+        <p>No hay pedidos registrados.</p>
+    </div>
+    <div th:unless="${orders == null or orders.isEmpty()}" class="brutalist-container">
+        <p class="brutalist-total-orders">Total de pedidos encontrados: <span th:text="${orders.size()}"></span></p>
+        <table class="brutalist-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Descripción</th>
+                    <th>Usuario</th>
+                    <th>Productos</th>
+                    <th sec:authorize="hasRole('MANAGER')">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}"></td>
+                    <td th:text="${order.description} ?: 'Sin descripción'"></td>
+                    <td th:text="${order.user?.username} ?: 'Sin usuario'"></td>
+                    <td>
+                        <span th:if="${order.orderProducts == null or order.orderProducts.isEmpty()}">
+                            Ningún producto
+                        </span>
+                        <span th:unless="${order.orderProducts == null or order.orderProducts.isEmpty()}" class="brutalist-product-list">
+                            <span th:each="op, iterStat : ${order.orderProducts}">
+                                <span th:text="${op.product?.name ?: 'Producto desconocido'} + ' (Cantidad: ' + ${op.amount} + ${op.product?.price != null ? ', $' + op.product.price : ''} + ')' + ${iterStat.last ? '' : ''}"></span>
+                            </span>
+                        </span>
+                    </td>
+                    <td sec:authorize="hasRole('MANAGER')">
+                        <div class="brutalist-action-buttons">
+                            <a th:href="@{/orders/edit/{id}(id=${order.id})}" class="brutalist-btn brutalist-btn--primary">Editar</a>
+                            <form th:action="@{/orders/delete/{id}(id=${order.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="brutalist-btn brutalist-btn--danger">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div sec:authorize="hasRole('MANAGER')">
+        <a th:href="@{/orders/new}" class="brutalist-btn brutalist-btn--primary">Crear Pedido</a>
+    </div>
+</body>
+</html>

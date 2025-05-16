@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title th:text="${order.id == null} ? 'Crear Pedido' : 'Editar Pedido'"></title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}"/>
+</head>
+<style>
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #d3d3d3;
+    color: #323232;
+    margin: 0;
+    padding: 0;
+}
+
+.brutalist-container {
+    padding: 20px;
+    background: lightgrey;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    border-radius: 5px;
+    border: 2px solid #323232;
+    box-shadow: 4px 4px #323232;
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+.brutalist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.brutalist-header h1 {
+    color: #323232;
+    font-weight: 900;
+    font-size: 20px;
+    margin: 0;
+}
+
+.brutalist-btn {
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: 2px solid #323232;
+    background-color: #fff;
+    box-shadow: 4px 4px #323232;
+    font-size: 15px;
+    font-weight: 600;
+    color: #323232;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.brutalist-btn--primary {
+    background-color: #2d8cf0;
+    color: #fff;
+    border-color: #2d8cf0;
+}
+
+.brutalist-btn--danger {
+    background-color: #fff;
+    color: #323232;
+}
+
+.brutalist-btn:active {
+    box-shadow: 0 0 #323232;
+    transform: translate(3px, 3px);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+label {
+    color: #323232;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+    border: 2px solid #323232;
+    background-color: #fff;
+    box-shadow: 4px 4px #323232;
+    font-size: 15px;
+    font-weight: 600;
+    color: #323232;
+    padding: 5px 10px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    border: 2px solid #2d8cf0;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #323232;
+    background-color: #fff;
+    box-shadow: 2px 2px #323232;
+}
+
+.brutalist-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border: 2px solid #323232;
+    box-shadow: 4px 4px #323232;
+}
+
+.brutalist-table th,
+.brutalist-table td {
+    border: 2px solid #323232;
+    padding: 10px;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+    color: #323232;
+}
+
+.brutalist-table th {
+    background-color: lightgrey;
+    text-transform: uppercase;
+}
+
+.error {
+    color: #666;
+    font-weight: 600;
+    font-size: 15px;
+    border: 2px solid #323232;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 4px 4px #323232;
+}
+</style>
+
+<body>
+    <div class="brutalist-container brutalist-header">
+        <h1 th:text="${order.id == null} ? 'Crear Pedido' : 'Editar Pedido'"></h1>
+        <div>
+            <span sec:authentication="name"></span>
+            <a th:href="@{/logout}" class="brutalist-btn brutalist-btn--danger">Cerrar Sesión</a>
+        </div>
+    </div>
+    <div class="brutalist-container">
+        <form th:action="${order.id == null} ? @{/orders} : @{/orders/update/{id}(id=${order.id})}" method="post">
+            <div>
+                <label for="description">Descripción:</label>
+                <input type="text" id="description" name="description" th:value="${order.description}" required/>
+            </div>
+            <div th:if="${error}" class="error" th:text="${error}"></div>
+            <div>
+                <label>Productos:</label>
+                <div th:if="${products == null or products.isEmpty()}">
+                    <p class="error">No hay productos disponibles.</p>
+                </div>
+                <div th:unless="${products == null or products.isEmpty()}">
+                    <table class="brutalist-table">
+                        <thead>
+                            <tr>
+                                <th>Seleccionar</th>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${products}">
+                                <td>
+                                    <input type="checkbox" th:id="'product-' + ${product.id}" name="productIds" th:value="${product.id}"
+                                           th:checked="${productIds != null and productIds.contains(product.id)}"/>
+                                </td>
+                                <td th:text="${product.name}"></td>
+                                <td th:text="'$' + ${product.price}"></td>
+                                <td>
+                                    <input type="number" name="amounts" min="1"
+                                           th:value="${productIds != null and productIds.contains(product.id) and amounts.size() > productIds.indexOf(product.id) ? amounts[productIds.indexOf(product.id)] : 1}"
+                                           th:class="'amount-input-' + ${product.id}"
+                                           th:style="${productIds != null and productIds.contains(product.id)} ? 'display: inline-block' : 'display: none'"
+                                           style="width: 60px;"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <button type="submit" class="brutalist-btn brutalist-btn--primary">Guardar</button>
+            <a th:href="@{/orders}" class="brutalist-btn">Cancelar</a>
+        </form>
+    </div>
+    <script>
+        document.querySelectorAll('input[name="productIds"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const productId = this.value;
+                const amountInput = document.querySelector('.amount-input-' + productId);
+                if (amountInput) {
+                    amountInput.style.display = this.checked ? 'inline-block' : 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

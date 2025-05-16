@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}"/>
+</head>
+<body>
+    <h1>Error</h1>
+    <p th:if="${error != null}" th:text="${error}">Error message goes here</p>
+    <p>An unexpected error occurred. Please try again later.</p>
+    <a th:href="@{/login}">Back to Login</a>
+</body>
+</html>
