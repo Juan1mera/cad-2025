@@ -3,6 +3,7 @@ plugins {
     war
     id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.4"
+    id("jacoco") // Agregar plugin JaCoCo
 }
 
 group = "ru.bsuedu.cad"
@@ -29,6 +30,7 @@ dependencies {
     // Base de datos
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("com.mysql:mysql-connector-j:8.0.33")
+    testImplementation("com.h2database:h2") // Agregar H2 para pruebas
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.4.14")
@@ -38,6 +40,8 @@ dependencies {
 
     // Pruebas
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") // Para pruebas de integración
+    testImplementation("org.mockito:mockito-core:5.12.0") // Para pruebas unitarias con Mockito
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -51,4 +55,19 @@ tasks.named<War>("war") {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport) // Generar informe JaCoCo después de las pruebas
+}
+
+// Configuración de JaCoCo
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/html"))
+    }
 }
